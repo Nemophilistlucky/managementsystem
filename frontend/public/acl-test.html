@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>智慧医院网络安全ACL仿真面板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
+    <div class="container mx-auto max-w-4xl bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl mt-10">
+        <header class="border-b border-slate-700 pb-4 mb-6">
+            <h1 class="text-2xl font-bold text-sky-400">智慧医院网络安全控制台</h1>
+            <p class="text-slate-400 text-xs mt-1">控制层：Cisco 3560 核心交换机 | 后端驱动：Java Spring Boot</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-xs text-slate-400 font-bold mb-1">源发起端 (Source)</label>
+                <select id="sourceVlan" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                    <option value="VLAN30">VLAN30 - 患者家属区</option>
+                    <option value="VLAN40" selected>VLAN40 - 公共区域</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 font-bold mb-1">目的端 (Destination)</label>
+                <select id="targetVlan" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                    <option value="VLAN10">VLAN10 - 核心医疗区</option>
+                    <option value="VLAN50" selected>VLAN50 - 服务器区(Web)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-xs text-slate-400 font-bold mb-1">协议类型</label>
+                <select id="protocol" onchange="togglePort()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                    <option value="ICMP">Ping测试 (ICMP)</option>
+                    <option value="TCP">应用层请求 (TCP)</option>
+                </select>
+            </div>
+            <div id="portWrapper" class="hidden">
+                <label class="block text-xs text-slate-400 font-bold mb-1">目的端口</label>
+                <input id="port" type="number" value="80" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+            </div>
+        </div>
+
+        <button onclick="sendPacket()" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg">
+            注入模拟数据流 (验证 ACL 过滤结果)
+        </button>
+
+        <div class="mt-6 bg-slate-900 p-4 rounded-lg min-h-[100px] border border-slate-700">
+            <h3 class="text-xs font-bold text-slate-500 uppercase mb-2">交换机实时监控日志：</h3>
+            <div id="result" class="text-sm font-mono text-slate-300">等待测试数据注入...</div>
+        </div>
+    </div>
+
+    <script>
+        function togglePort() {
+            const proto = document.getElementById('protocol').value;
+            document.getElementById('portWrapper').classList.toggle('hidden', proto !== 'TCP');
+        }
+        
+        function sendPacket() {
+            const resDiv = document.getElementById('result');
+            resDiv.innerText = "正在发送数据包...";
+
+            fetch('http://localhost:8080/api/test_connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    source: document.getElementById('sourceVlan').value,
+                    target: document.getElementById('targetVlan').value,
+                    protocol: document.getElementById('protocol').value,
+                    port: document.getElementById('port').value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    resDiv.innerHTML = `<span class="text-emerald-400 font-bold">[放行]</span> ` + data.message;
+                } else {
+                    resDiv.innerHTML = `<span class="text-rose-400 font-bold">[阻断]</span> ` + data.message;
+                }
+            })
+            .catch(err => {
+                resDiv.innerHTML = `<span class="text-amber-400 font-bold">[错误]</span> 无法连接到 Java 后端，请确保您的后端项目已在 8080 端口成功运行。`;
+            });
+        }
+    </script>
+</body>
+</html>
