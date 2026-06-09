@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>H5家长端信息查阅系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 flex flex-col items-center justify-center">
+    
+    <div id="loginCard" class="w-full max-w-sm bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-4">
+        <div class="text-center">
+            <h3 class="text-sm font-bold text-indigo-400">📱 寻道大学 H5 家长短信鉴权跳转端</h3>
+            <p class="text-[10px] text-slate-500 mt-1">初始密码默认发至父亲或母亲，为身份证后六位。</p>
+        </div>
+        <input id="idCard" type="text" placeholder="身份证号账号" value="110101200501011234" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200">
+        <input id="pwd" type="password" placeholder="请输入六位登录密码" value="011234" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200">
+        <button onclick="parentLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs transition">通过内部信誉通道验证登录</button>
+        <div class="text-center pt-2"><a href="index.html" class="text-xs text-slate-500 underline">返回学校登录大厅</a></div>
+    </div>
+
+    <div id="h5Page" class="hidden w-full max-w-md p-5 rounded-2xl shadow-2xl transition-all duration-300 space-y-4">
+        <div class="flex justify-between items-center border-b border-white/10 pb-2">
+            <h2 id="title" class="font-bold text-xs"></h2>
+            <img id="badge" src="" class="w-8 h-8 object-contain">
+        </div>
+        <p id="mainText" class="text-xs text-slate-200 leading-relaxed font-sans"></p>
+        <div class="bg-black/30 p-3 rounded-xl border border-white/5 font-mono text-xs text-amber-300">
+            <div class="text-[10px] text-slate-400 mb-1 font-sans">📊 教学评估处同步学年考试成绩单：</div>
+            <div id="score"></div>
+        </div>
+        <div class="pt-2 border-t border-white/10 flex gap-2">
+            <input id="fbText" type="text" placeholder="回传家长不满意、意见反馈补充..." class="flex-1 bg-black/20 border border-white/10 rounded p-1 text-xs text-slate-200">
+            <button onclick="submitFb()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded text-xs font-bold text-white shadow">提交回传</button>
+        </div>
+        <div class="text-center pt-2"><a href="index.html" class="text-[10px] text-white/40 underline">关闭页面安全退出</a></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api/v1';
+        let curStudentId = null;
+
+        function parentLogin() {
+            const idCard = document.getElementById('idCard').value;
+            const password = document.getElementById('pwd').value;
+
+            fetch(`${API_BASE}/parent/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ idCard, password })
+            }).then(res => res.json()).then(data => {
+                if(data.code !== 200) { alert(data.msg); return; }
+                curStudentId = data.student.id;
+                document.getElementById('loginCard').classList.add('hidden');
+                
+                const page = document.getElementById('h5Page');
+                page.classList.remove('hidden');
+                // 自动动态匹配后端设定的朴素背景风格
+                page.className = `w-full max-w-md p-5 rounded-2xl shadow-2xl transition-all duration-300 ${data.template.bgStyle}`;
+                
+                document.getElementById('title').innerText = data.template.title;
+                document.getElementById('badge').src = data.template.badgeUrl;
+                document.getElementById('mainText').innerHTML = `<strong>${data.student.parentName}家长您好：</strong><br>${data.template.content}<br><div class="text-sky-300 font-bold mt-2">🧑‍🏫 辅导员本学年录入表现评语：</div><div class="italic text-slate-300 bg-black/20 p-2 rounded border border-white/5 mt-0.5">${data.student.awards}</div>`;
+                document.getElementById('score').innerText = data.student.score;
+            });
+        }
+
+        function submitFb() {
+            const txt = document.getElementById('fbText').value;
+            fetch(`${API_BASE}/parent/submit-feedback`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: curStudentId, text: txt })
+            }).then(res => res.json()).then(data => {
+                alert(data.msg);
+                document.getElementById('fbText').value = '';
+            });
+        }
+    </script>
+</body>
+</html>
