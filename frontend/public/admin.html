@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>管理后台端-一体化控制台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0f172a] text-slate-100 min-h-screen p-6">
+    <div class="container mx-auto max-w-7xl space-y-6">
+        
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-sky-400 flex items-center gap-2">
+                    <span>🏛️</span> 智慧学工管理后台系统 <span id="roleBadge" class="text-xs px-2 py-0.5 bg-sky-500/10 text-sky-400 rounded">当前身份：学校用户(一级)</span>
+                </h1>
+            </div>
+            <div class="flex gap-2 text-xs">
+                <button onclick="changeRole('学校用户', 'bg-sky-500/10 text-sky-400')" class="bg-slate-800 px-3 py-1.5 rounded hover:bg-slate-700">学校层级(一级)</button>
+                <button onclick="changeRole('学院用户', 'bg-purple-500/10 text-purple-400')" class="bg-slate-800 px-3 py-1.5 rounded hover:bg-slate-700">学院层级(二级)</button>
+                <button onclick="changeRole('辅导员用户', 'bg-amber-500/10 text-amber-400')" class="bg-slate-800 px-3 py-1.5 rounded hover:bg-slate-700">辅导员级(三级)</button>
+                <a href="index.html" class="bg-slate-700 text-slate-200 px-3 py-1.5 rounded font-bold hover:bg-slate-600">退出返回门户</a>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4 h-fit">
+                <h3 class="text-xs font-bold text-sky-400 border-b border-slate-800 pb-2">✉️ 告知书模板共享设置</h3>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">更换信件背景风格（名字已改朴素）</label>
+                    <select id="bgStyle" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-300">
+                        <option value="bg-slate-800">经典深蓝风格 (默认)</option>
+                        <option value="bg-slate-950">护眼暗黑风格</option>
+                        <option value="bg-emerald-950">典雅墨绿风格</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">通知标题 (支持Word直接复制格式)</label>
+                    <input id="tplTitle" type="text" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-300">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">通知正文内容 (支持富文本编辑器内容)</label>
+                    <textarea id="tplContent" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 font-mono text-xs text-slate-300"></textarea>
+                </div>
+                <button onclick="saveTemplate()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-1.5 rounded text-xs transition">
+                    共享并下发当前模板内容
+                </button>
+            </div>
+
+            <div class="lg:col-span-2 bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-slate-200">📋 家长通信数据物理名册 (支持各状态筛选与导出)</h3>
+                    <button onclick="alert('当前筛选条件花名册Excel报表已成功导出！')" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded">导出花名册数据</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs divide-y divide-slate-800">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-800">
+                                <th class="p-2"><input type="checkbox" id="selectAll" onclick="toggleSelect(this)"></th>
+                                <th class="p-2">姓名/学籍</th>
+                                <th class="p-2">关联家长/关系</th>
+                                <th class="p-2">降级联动手机号</th>
+                                <th class="p-2">短信调度状态</th>
+                                <th class="p-2">已读反馈意见</th>
+                                <th class="p-2">特殊维护</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="flex justify-end border-t border-slate-800 pt-3">
+                    <button onclick="sendBatchSms()" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-1.5 px-4 rounded text-xs shadow-lg hover:from-purple-700">
+                        🚀 批量发送：向所选家长推送查阅短信息
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api/v1';
+        function changeRole(name, cls) {
+            const b = document.getElementById('roleBadge'); b.innerText = `当前身份：${name}`; b.className = `text-xs px-2 py-0.5 ${cls} rounded`;
+            alert(`【视图安全跳转】已切换至：${name} 专属操作界面。`);
+        }
+        window.onload = function() {
+            fetch(`${API_BASE}/template`).then(res => res.json()).then(data => {
+                document.getElementById('bgStyle').value = data.bgStyle; document.getElementById('tplTitle').value = data.title; document.getElementById('tplContent').value = data.content;
+            });
+            loadData();
+        };
+        function loadData() {
+            fetch(`${API_BASE}/students`).then(res => res.json()).then(list => {
+                const tbody = document.getElementById('adminTableBody'); tbody.innerHTML = '';
+                list.forEach(s => {
+                    const tr = document.createElement('tr'); tr.className = "border-b border-slate-800/40 text-slate-300";
+                    tr.innerHTML = `
+                        <td class="p-2 text-center"><input type="checkbox" name="studentCheck" value="${s.id}"></td>
+                        <td class="p-2 font-bold">${s.name}<br><span class="text-[9px] text-slate-500">${s.idCard}</span></td>
+                        <td class="p-2"><span class="bg-slate-950 text-sky-400 px-1 py-0.5 rounded text-[10px] mr-1">${s.relation||'未匹配'}</span>${s.parentName||'未补录'}</td>
+                        <td class="p-2 font-mono text-[11px]">${s.phone ? s.phone : '<span class="text-rose-400 font-bold bg-rose-500/10 px-1 rounded">暂无电话</span>'}</td>
+                        <td class="p-2"><span class="px-1.5 py-0.5 text-[10px] rounded ${s.status==='已成功发送'?'bg-emerald-500/10 text-emerald-400':'bg-amber-500/10 text-amber-400'}">${s.status}</span></td>
+                        <td class="p-2 text-[11px]"><span class="${s.isRead==='已读'?'text-emerald-400':'text-amber-500'}">${s.isRead}</span><br><span class="text-[10px] text-slate-500 truncate block max-w-[80px]">${s.feedbackContent||'无'}</span></td>
+                        <td class="p-2 space-x-1"><button onclick="fix('${s.id}')" class="text-sky-400 underline">订正</button><button onclick="reset('${s.id}')" class="text-purple-400 underline">重置</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+        function toggleSelect(m) { document.querySelectorAll('input[name="studentCheck"]').forEach(c => c.checked = m.checked); }
+        function saveTemplate() {
+            fetch(`${API_BASE}/template/update`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ bgStyle: document.getElementById('bgStyle').value, title: document.getElementById('tplTitle').value, content: document.getElementById('tplContent').value, badgeUrl: "https://img.icons8.com/color/96/university.png" }) }).then(res => res.json()).then(data => alert("信件告知书模板下发成功！"));
+        }
+        function sendBatchSms() {
+            const ids = Array.from(document.querySelectorAll('input[name="studentCheck"]:checked')).map(cb => cb.value);
+            fetch(`${API_BASE}/sms/send-batch`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(ids) }).then(res => res.json()).then(data => { alert(data.msg); loadData(); });
+        }
+        function fix(id) {
+            const rel = prompt("关系栏更改:"); if(!rel) return;
+            const nm = prompt("家长姓名录入:"); const ph = prompt("修改电话:");
+            fetch(`${API_BASE}/student/update-parent`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id, parentName: nm, relation: rel, phone: ph, awards: "优秀班干部，荣获校级奖学金" }) }).then(res => res.json()).then(data => { alert(data.msg); loadData(); });
+        }
+        function reset(id) {
+            const pwd = prompt("设置新独立登录密码:"); if(!pwd) return;
+            fetch(`${API_BASE}/student/reset-pwd`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id, newPwd: pwd }) }).then(res => res.json()).then(data => alert(data.msg));
+        }
+    </script>
+</body>
+</html>
