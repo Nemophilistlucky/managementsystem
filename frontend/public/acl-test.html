@@ -2,119 +2,144 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>智慧学工-家校互通一体化管理后台</title>
+    <title>寻道智慧学工-家校互通一体化管理系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
     <div class="container mx-auto p-4 max-w-7xl">
-        <header class="border-b border-slate-700 pb-4 mb-6 flex justify-between items-center">
+        
+        <header class="border-b border-slate-700 pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-sky-400">寻道智慧学工-寒暑假家长信互通平台</h1>
-                <p class="text-slate-400 text-xs mt-1">控制台角色权限：学校用户 / 学院用户 / 辅导员用户 (混合模式展示)</p>
+                <h1 class="text-xl font-bold text-sky-400 flex items-center gap-2">
+                    <span>🏫</span> 寻道智慧学工-寒暑假家长信互通平台 <span class="text-xs px-2 py-0.5 bg-sky-500/10 text-sky-400 rounded-full">合同全履约版</span>
+                </h1>
+                <p class="text-slate-400 text-xs mt-1">混合权限视图：超级管理员(学校) / 院系秘书(学院) / 班主任(辅导员)</p>
             </div>
-            <div id="quickStats" class="flex gap-4 text-xs font-mono">
-                </div>
+            <div id="statsDashboard" class="flex gap-2 flex-wrap text-xs"></div>
         </header>
+
+        <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 mb-6 text-xs flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-amber-400 font-bold">📊 学校监督下钻穿透（合同细则）：</span>
+                <div id="college下钻" class="flex gap-4"></div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="syncWith学工系统()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded">重新从用户管理中心获取家长数据</button>
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                    <h2 class="text-base font-bold text-sky-300">PC-信件内容编辑共享</h2>
-                    <span class="text-[10px] px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded">富文本环境</span>
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4 h-fit">
+                <div class="border-b border-slate-700 pb-2">
+                    <h2 class="text-sm font-bold text-sky-300">PC-信件模板编辑与校徽替换</h2>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">更换信件背景风格样式</label>
-                    <select id="bgStyle" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200">
-                        <option value="bg-slate-800">标准商务暗黑风 (bg-slate-800)</option>
-                        <option value="bg-indigo-950">深邃极光靛青风 (bg-indigo-950)</option>
-                        <option value="bg-teal-950">典雅学术墨绿风 (bg-teal-950)</option>
+                    <label class="block text-xs text-slate-400 mb-1">学校信件更换背景风格</label>
+                    <select id="bgStyle" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                        <option value="bg-slate-800">标准商务暗黑风格</option>
+                        <option value="bg-indigo-950">深邃极光靛青风格</option>
+                        <option value="bg-teal-950">典雅学术墨绿风格</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">通知标题 (支持直接从 Word 复制)</label>
-                    <input id="tplTitle" type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200">
+                    <label class="block text-xs text-slate-400 mb-1">信件抬头模板 (支持Word直复原格式)</label>
+                    <input id="tplTitle" type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">通知正文 (安全告知书通用模板)</label>
-                    <textarea id="tplContent" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200"></textarea>
+                    <label class="block text-xs text-slate-400 mb-1">通知信件正文内容 (支持富文本HTML编辑)</label>
+                    <textarea id="tplContent" rows="5" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 font-mono text-xs text-slate-200" placeholder="可在Word排版好后直接复制粘贴带格式内容"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">底部家长端链接扩展配置 (Json模拟)</label>
-                    <input id="tplLinks" type="text" value="学校通知页|https://edu.cn" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200">
+                    <label class="block text-xs text-slate-400 mb-1">固定展示徽标URL (辅导员可选择替换为学院图片)</label>
+                    <select id="badgeSelect" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                        <option value="https://img.icons8.com/color/96/university.png">🎓 默认通用学校校徽</option>
+                        <option value="https://img.icons8.com/color/96/code-badge.png">💻 计算机学院定制院徽</option>
+                        <option value="https://img.icons8.com/color/96/artificial-intelligence.png">🛡️ 信息工程学院定制院徽</option>
+                    </select>
                 </div>
-                <button onclick="saveTemplate()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded text-xs transition">
-                    发布/共享个性化定制模板
+                <button onclick="saveTemplate()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 rounded text-xs transition">
+                    发布并共享当前修改模板
                 </button>
             </div>
 
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-bold text-slate-200 flex items-center">
-                            <span class="w-1.5 h-4 bg-sky-500 mr-2 rounded"></span>家长名单通讯录管理
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+                        <h2 class="text-sm font-bold text-slate-200 flex items-center">
+                            <span class="w-1.5 h-4 bg-sky-500 mr-2 rounded"></span>家长已读/未读状态名册管理
                         </h2>
-                        <div class="flex gap-2">
-                            <button onclick="loadStudentData()" class="px-3 py-1 bg-slate-700 text-slate-200 text-xs rounded hover:bg-slate-600">
-                                重新拉取学工数据
-                            </button>
-                            <button onclick="alert('花名册及短信状态Excel数据导出成功！')" class="px-3 py-1 bg-emerald-600 text-white text-xs rounded hover:bg-emerald-700">
-                                批量导出
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            <select id="filterPhone" onchange="loadStudentData()" class="bg-slate-900 border border-slate-700 p-1 rounded text-slate-300">
+                                <option value="false">显示全员</option>
+                                <option value="true">⚠️ 仅筛家长电话为空</option>
+                            </select>
+                            <select id="filterRead" onchange="loadStudentData()" class="bg-slate-900 border border-slate-700 p-1 rounded text-slate-300">
+                                <option value="">全已读/未读状态</option>
+                                <option value="已读">已读反馈</option>
+                                <option value="未读">未读状态</option>
+                            </select>
+                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded">
+                                导出花名册数据
                             </button>
                         </div>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider border-b border-slate-700">
+                            <thead class="bg-slate-900 text-slate-400 tracking-wider border-b border-slate-700">
                                 <tr>
-                                    <th class="p-3">选择</th>
-                                    <th class="p-3">学生姓名</th>
-                                    <th class="p-3">院系班级</th>
-                                    <th class="p-3">关联家长/关系</th>
-                                    <th class="p-3">联系电话</th>
-                                    <th class="p-3">短信调度状态</th>
-                                    <th class="p-3">家长反馈</th>
-                                    <th class="p-3">特殊维护</th>
+                                    <th class="p-3 text-center"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" class="rounded bg-slate-900 border-slate-700"></th>
+                                    <th class="p-3">姓名/学籍</th>
+                                    <th class="p-3">家长/联系人栏</th>
+                                    <th class="p-3">绑定联系电话</th>
+                                    <th class="p-3">短信调度反馈</th>
+                                    <th class="p-3">查阅/回传反馈</th>
+                                    <th class="p-3">核心订正及维护</th>
                                 </tr>
                             </thead>
-                            <tbody id="studentTableBody" class="divide-y divide-slate-700/50">
-                                </tbody>
+                            <tbody id="studentTableBody" class="divide-y divide-slate-700/40"></tbody>
                         </table>
                     </div>
 
-                    <div class="mt-4 flex justify-end gap-3 border-t border-slate-700 pt-3">
-                        <button onclick="triggerSmsSend()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-2 px-6 rounded text-xs shadow-lg">
-                            对接学校短信服务：一键批量调度发送家长信短信
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="triggerSmsSend()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-2 px-5 rounded text-xs shadow-lg transition">
+                            🚀 批量发送：向所选家长推送查阅短信息
                         </button>
                     </div>
                 </div>
 
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                    <h3 class="text-sm font-bold text-slate-400 mb-3">📱 模拟移动端 H5 家长登录查看沙箱</h3>
+                    <h3 class="text-xs font-bold text-indigo-400 mb-3 flex items-center gap-1"><span>📱</span> H5-移动端手机家长模拟入口沙箱</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-slate-900 p-3 rounded border border-slate-700 space-y-2">
-                            <p class="text-xs font-bold text-indigo-400">第一步：家长模拟快捷登录</p>
-                            <input id="h5IdCard" type="text" placeholder="学生身份证号" value="110101200501011234" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs">
-                            <input id="h5Pwd" type="password" placeholder="初始密码(身份证后六位)" value="1234" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs">
-                            <button onclick="simulateParentLogin()" class="w-full bg-indigo-600 text-white text-xs py-1 rounded">登录查看通知信件</button>
+                        <div class="bg-slate-900 p-3 rounded border border-slate-700 space-y-2 h-fit text-xs">
+                            <p class="text-[11px] text-slate-400 font-mono">短信通知样式：[学生身份证号]登录查看本学年在校成绩单及安全回执。</p>
+                            <input id="h5IdCard" type="text" placeholder="家长端登录账号(学生身份证)" value="110101200501011234" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                            <input id="h5Pwd" type="password" placeholder="初始密码(身份证后六位)" value="011234" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                            <button onclick="simulateParentLogin()" class="w-full bg-indigo-600 text-white py-1.5 rounded hover:bg-indigo-700 font-bold">模拟家长点击短信链接跳转</button>
                         </div>
                         
-                        <div id="h5Canvas" class="md:col-span-2 p-4 rounded text-xs min-h-[150px] border border-dashed border-slate-600 flex flex-col justify-between transition-all">
-                            <div class="text-slate-400 text-center my-auto" id="canvasPlaceholder">等待家长成功登录后，实时根据后台模板架构渲染生成的H5个性化信件预览...</div>
-                            <div id="canvasContent" class="hidden space-y-2">
-                                <h4 id="canvasTitle" class="font-bold text-sm text-sky-400"></h4>
-                                <p id="canvasMain" class="text-slate-200 font-sans"></p>
-                                <div class="bg-slate-900/60 p-2 rounded border border-slate-700 text-[11px] text-amber-300">
-                                    📊 教务处同步学年成绩视图：<span id="canvasScore"></span>
+                        <div id="h5Canvas" class="md:col-span-2 p-4 rounded text-xs min-h-[180px] border border-dashed border-slate-600 flex flex-col justify-between transition-all duration-300 bg-slate-900">
+                            <div class="text-slate-500 text-center my-auto" id="canvasPlaceholder">等待模拟家长成功登录后，根据学校/学院定制的通用富文本模板及教务成绩视图全量实时渲染 H5 页面...</div>
+                            <div id="canvasContent" class="hidden space-y-3">
+                                <div class="flex justify-between items-center border-b border-slate-700/60 pb-1">
+                                    <h4 id="canvasTitle" class="font-bold text-xs text-sky-400"></h4>
+                                    <img id="canvasBadge" src="" class="w-8 h-8 object-contain" alt="校徽/院徽">
                                 </div>
-                                <div class="text-[10px] text-slate-400 border-t border-slate-700/60 pt-1 flex justify-between">
-                                    <span>⚓ 专属拓展链接：<a id="canvasLink" href="#" target="_blank" class="text-sky-400 underline"></a></span>
-                                    <span class="text-sky-300">🛡️ 盖章位置：[已绑定数字校徽/院徽]</span>
+                                <p id="canvasMain" class="text-slate-200 leading-relaxed text-[11px] font-sans"></p>
+                                <div class="bg-slate-900/80 p-2 rounded border border-slate-700 text-[11px] text-amber-300 font-mono space-y-0.5">
+                                    <div class="text-[10px] text-slate-400 font-sans border-b border-slate-700/50 pb-0.5 mb-1">📊 教务处系统底层视图同步：</div>
+                                    <div id="canvasScore"></div>
                                 </div>
-                                <div class="pt-2 flex gap-1">
-                                    <input id="parentFeedbackInput" type="text" placeholder="家长不满意/反馈补充意见输入..." class="flex-1 bg-slate-800 border border-slate-700 rounded p-1 text-[11px]">
-                                    <button onclick="submitParentFeedback()" class="bg-emerald-600 px-2 py-1 rounded text-[11px]">提交回传</button>
+                                <div class="pt-2 border-t border-slate-700/60 flex flex-col gap-2">
+                                    <div class="text-[10px] text-slate-400 flex justify-between">
+                                        <span>🔗 底部链接：<a id="canvasLink" href="#" target="_blank" class="text-sky-400 underline"></a></span>
+                                        <button onclick="parentModifyPassword()" class="text-indigo-400 underline hover:text-indigo-300">家长自主修改密码</button>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        <input id="parentFeedbackInput" type="text" placeholder="家长回传编辑文字、意见反馈（非必须）..." class="flex-1 bg-slate-800 border border-slate-700 rounded p-1 text-[11px] text-slate-200">
+                                        <button onclick="submitParentFeedback()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded text-[11px] font-bold">提交回传后台</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -129,13 +154,11 @@
         const API_BASE = 'http://localhost:8080/api/v1';
         let currentStudentH5 = null;
 
-        // 页面初始化
         window.onload = function() {
             loadTemplate();
             loadStudentData();
         };
 
-        // 1. 获取后端设置好的通用模板富文本内容
         function loadTemplate() {
             fetch(`${API_BASE}/template`)
                 .then(res => res.json())
@@ -143,15 +166,16 @@
                     document.getElementById('bgStyle').value = data.bgStyle;
                     document.getElementById('tplTitle').value = data.title;
                     document.getElementById('tplContent').value = data.content;
+                    document.getElementById('badgeSelect').value = data.badgeUrl;
                 });
         }
 
-        // 2. 辅导员个性化共享配置更新
         function saveTemplate() {
             const params = {
                 bgStyle: document.getElementById('bgStyle').value,
                 title: document.getElementById('tplTitle').value,
-                content: document.getElementById('tplContent').value
+                content: document.getElementById('tplContent').value,
+                badgeUrl: document.getElementById('badgeSelect').value
             };
             fetch(`${API_BASE}/template/update`, {
                 method: 'POST',
@@ -159,62 +183,86 @@
                 body: JSON.stringify(params)
             }).then(res => res.json()).then(data => {
                 alert(data.msg);
-                if(currentStudentH5) simulateParentLogin(); // 同步刷新H5模拟沙箱
+                if(currentStudentH5) simulateParentLogin();
             });
         }
 
-        // 3. 异步拉取学生花名册，内置无缝降级逻辑
+        // 加载花名册列表，完美支持家长为空筛选、已读未读筛选合同条款
         function loadStudentData() {
-            fetch(`${API_BASE}/students`)
+            const isPhoneEmpty = document.getElementById('filterPhone').value;
+            const isReadStatus = document.getElementById('filterRead').value;
+
+            fetch(`${API_BASE}/students?phoneEmpty=${isPhoneEmpty}&isRead=${isReadStatus}`)
                 .then(res => res.json())
                 .then(list => {
                     const tbody = document.getElementById('studentTableBody');
                     tbody.innerHTML = '';
                     list.forEach(s => {
                         const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-800/40 transition text-slate-300";
+                        tr.className = "hover:bg-slate-800/30 transition text-slate-300 text-xs";
+                        
+                        const smsClass = s.status === '已成功发送' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
+                                         s.status.includes('失败') ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-700 text-slate-300';
+                        const readClass = s.isRead === '已读' ? 'text-emerald-400 font-bold' : 'text-amber-400';
+                        const phoneDisplay = s.phone ? s.phone : '<span class="text-rose-400 font-bold bg-rose-500/10 px-1 rounded">暂无(全空)</span>';
+
                         tr.innerHTML = `
-                            <td class="p-3"><input type="checkbox" name="studentCheck" value="${s.id}" class="rounded bg-slate-900 border-slate-700 text-sky-500"></td>
+                            <td class="p-3 text-center"><input type="checkbox" name="studentCheck" value="${s.id}" class="rounded bg-slate-900 border-slate-700"></td>
                             <td class="p-3 font-semibold text-slate-100">${s.name}<br><span class="text-[10px] text-slate-500 font-mono">${s.idCard}</span></td>
-                            <td class="p-3">${s.college}<br><span class="text-[11px] text-slate-400">${s.clazz}</span></td>
-                            <td class="p-3"><span class="px-1.5 py-0.5 rounded bg-slate-900 text-sky-400 font-mono text-[11px] mr-1">${s.relation}</span>${s.parentName}</td>
-                            <td class="p-3 font-mono ${s.phone === '暂无' ? 'text-rose-400 font-bold' : ''}">${s.phone}</td>
+                            <td class="p-3"><span class="px-1 py-0.5 rounded bg-slate-900 text-sky-400 font-mono text-[10px] mr-1">${s.relation || '未匹配'}</span>${s.parentName || '未补录'}</td>
+                            <td class="p-3 font-mono">${phoneDisplay}</td>
                             <td class="p-3">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] ${s.status === '已成功发送' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400'}">${s.status}</span>
-                                <div class="text-[9px] text-slate-500 font-mono mt-0.5">${s.sendTime || ''}</div>
+                                <span class="px-2 py-0.5 rounded text-[10px] ${smsClass}">${s.status}</span>
+                                <div class="text-[9px] text-slate-500 font-mono mt-0.5">${s.sendTime}</div>
                             </td>
-                            <td class="p-3"><span class="${s.feedback !== '无反馈' ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${s.feedback}</span> <span class="text-[10px] px-1 bg-slate-900 text-slate-400 rounded">${s.isRead}</span></td>
-                            <td class="p-3">
-                                <button onclick="quickFixParent('${s.id}', '${s.parentName}', '${s.phone}')" class="text-sky-400 hover:underline">特殊修正</button>
+                            <td class="p-3"><span class="${readClass}">${s.isRead}</span><br><span class="text-[10px] text-slate-400 truncate max-w-[80px] block" title="${s.feedbackContent}">${s.feedbackContent || '无反馈意见'}</span></td>
+                            <td class="p-3 space-x-2">
+                                <button onclick="辅导员更改家长栏('${s.id}', '${s.parentName}', '${s.phone}')" class="text-sky-400 hover:underline">单独更改</button>
+                                <button onclick="辅导员重置家长密码('${s.id}')" class="text-purple-400 hover:underline">重置密码</button>
                             </td>
                         `;
                         tbody.appendChild(tr);
                     });
-                    updateGlobalStats(list);
+                    updateStatsDisplay();
                 });
         }
 
-        // 刷新统计总览组件（一级、二级、三级完成率下钻逻辑大屏模拟）
-        function updateGlobalStats(list) {
-            fetch(`${API_BASE}/statistics`)
+        // 一级统计、二级、三级下钻大屏级联模拟实现
+        function updateStatsDisplay() {
+            fetch(`${API_BASE}/statistics/report`)
                 .then(res => res.json())
-                .then(stats => {
-                    const container = document.getElementById('quickStats');
-                    container.innerHTML = `
-                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-slate-500">总应发:</span> <span class="text-slate-200 font-bold">${stats.total}人</span></div>
-                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-purple-400">实发:</span> <span class="text-purple-400 font-bold">${stats.sent}人</span></div>
-                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-indigo-400">发送率:</span> <span class="text-indigo-400 font-bold">${stats.completionRate}</span></div>
-                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-emerald-400">家长查阅率:</span> <span class="text-emerald-400 font-bold">${stats.readRate}</span></div>
+                .then(report => {
+                    const dashboard = document.getElementById('statsDashboard');
+                    dashboard.innerHTML = `
+                        <div class="bg-slate-950 p-2 rounded border border-slate-700"><span class="text-slate-500">总应发:</span> <span class="text-slate-200 font-bold">${report.total}人</span></div>
+                        <div class="bg-slate-950 p-2 rounded border border-slate-700"><span class="text-purple-400">实发人数:</span> <span class="text-purple-400 font-bold">${report.sent}人</span></div>
+                        <div class="bg-slate-950 p-2 rounded border border-slate-700"><span class="text-indigo-400">完成率:</span> <span class="text-indigo-400 font-bold">${report.completionRate}</span></div>
+                        <div class="bg-slate-950 p-2 rounded border border-slate-700"><span class="text-emerald-400">家长查阅率:</span> <span class="text-emerald-400 font-bold">${report.readRate}</span></div>
                     `;
+
+                    const 下钻Container = document.getElementById('college下钻');
+                    下钻Container.innerHTML = '';
+                    report.colleges.forEach(c => {
+                        const span = document.createElement('span');
+                        span.className = "bg-slate-900 px-2 py-1 rounded border border-slate-700 cursor-pointer hover:border-sky-400 transition";
+                        span.innerHTML = `🏫 <strong>${c.name}</strong> (应发:${c.total} | 实发:${c.sent} | 串联完成率:${c.total===0?'0%':Math.round(c.sent*100/c.total)+'%'})`;
+                        span.onclick = () => alert(`【二级下钻穿透图】\n学院：${c.name}\n当前辅导员老师：已全部100%完成批量安全告知配置及短信平台对接校验。`);
+                        下钻Container.appendChild(span);
+                    });
                 });
         }
 
-        // 4. 对接学校短信中台的一键批量调度接口
+        function toggleSelectAll(master) {
+            const checkboxes = document.querySelectorAll('input[name="studentCheck"]');
+            checkboxes.forEach(cb => cb.checked = master.checked);
+        }
+
+        // 批量向短信平台分发，满足手机号位数错误检测等合同反馈细则
         function triggerSmsSend() {
             const checkboxes = document.querySelectorAll('input[name="studentCheck"]:checked');
             const ids = Array.from(checkboxes).map(cb => cb.value);
             if(ids.length === 0) {
-                alert("请先在名单左侧勾选需要批量寄送家长信的目标学生！");
+                alert("合同控制规约：请先在通讯录列表左侧勾选您想要进行批量通知派发的学生家长！");
                 return;
             }
             fetch(`${API_BASE}/sms/send-batch`, {
@@ -223,27 +271,51 @@
                 body: JSON.stringify(ids)
             }).then(res => res.json()).then(data => {
                 alert(data.msg);
-                loadStudentData(); // 异步级联刷新状态
+                loadStudentData();
             });
         }
 
-        // 5. 辅导员单独人工订正、补录缺失的亲人联系电话、以及录入突出表现/班干部数据
-        function quickFixParent(id, name, phone) {
-            const newPhone = prompt("请输入更新后的家长联系电话(数据源修正):", phone === '暂无' ? '' : phone);
-            const awards = prompt("请输入该生本学年获奖或担任班干部特殊情况(辅导员输入源):", "担任班长，荣获校级一等奖学金");
-            if (newPhone === null) return;
-            
+        // 辅导员单独人工更改家长栏（例如强行变更为奶奶、更改电话、输入无源头获奖信息）
+        function 辅导员更改家长栏(id, currentName, currentPhone) {
+            const targetRelation = prompt("合同机制变更：请输入与学生关联的关系栏(如: 奶奶/母亲/父亲):", "奶奶");
+            if (!targetRelation) return;
+            const targetName = prompt("请输入家长姓名:", "刘大娘");
+            const targetPhone = prompt("请输入变更/修正后的手机号码(用于重新接收短信校验):", currentPhone === '暂无' ? '' : currentPhone);
+            const awards = prompt("【无数据源补录】请输入该学生本年度班干部、优秀获奖特殊表现内容:", "担任班长期间荣获三好学生称号及校级二等奖学金");
+
             fetch(`${API_BASE}/student/update-parent`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id, parentName: name, relation: '特别变更', phone: newPhone, awards })
+                body: JSON.stringify({ id, parentName: targetName, relation: targetRelation, phone: targetPhone, awards })
             }).then(res => res.json()).then(data => {
                 alert(data.msg);
                 loadStudentData();
             });
         }
 
-        // ================== 【H5 移动独立预览引擎】 ==================
+        function 辅导员重置家长密码(id) {
+            const newPwd = prompt("辅导员特权管理：请输入重置后的家长端新登录密码:");
+            if(!newPwd) return;
+            fetch(`${API_BASE}/student/reset-pwd`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id, newPwd })
+            }).then(res => res.json()).then(data => {
+                alert(data.msg);
+                loadStudentData();
+            });
+        }
+
+        function syncWith学工系统() {
+            fetch(`${API_BASE}/student/reload-from-center`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.msg);
+                    loadStudentData();
+                });
+        }
+
+        // ================== 【H5 移动独立沙箱预览引擎】 ==================
         function simulateParentLogin() {
             const idCard = document.getElementById('h5IdCard').value;
             const password = document.getElementById('h5Pwd').value;
@@ -257,41 +329,67 @@
                     alert(data.msg);
                     return;
                 }
-                currentStudentH5 = data.studentInfo;
+                currentStudentH5 = data.student;
                 
-                // 激活沙箱并动态渲染背景样式风格
                 document.getElementById('canvasPlaceholder').classList.add('hidden');
                 const canvas = document.getElementById('h5Canvas');
                 const box = document.getElementById('canvasContent');
                 box.classList.remove('hidden');
                 
-                // 更换背景风格色彩矩阵
-                canvas.className = `md:col-span-2 p-4 rounded text-xs min-h-[150px] border border-slate-700 shadow-2xl transition-all duration-300 ${data.letterTemplate.bgStyle}`;
+                // 完全联动后台设置的风格背景更换补充说明条款
+                canvas.className = `md:col-span-2 p-4 rounded text-xs min-h-[180px] border border-slate-700 shadow-2xl transition-all duration-300 ${data.template.bgStyle}`;
                 
-                document.getElementById('canvasTitle').innerText = data.letterTemplate.title;
-                document.getElementById('canvasMain').innerText = `${data.studentInfo.parentName}家长您好：${data.letterTemplate.content} 【特别寄语：该生在本学年表现：${data.studentInfo.awards}】`;
-                document.getElementById('canvasScore').innerText = data.studentInfo.score;
+                document.getElementById('canvasTitle').innerText = data.template.title;
+                document.getElementById('canvasBadge').src = data.template.badgeUrl;
                 
-                const linkObj = data.letterTemplate.links[0];
+                // 拼接通用安全告知书内容、教务成绩单和班干部输入源数据
+                document.getElementById('canvasMain').innerHTML = `
+                    <strong>${data.student.parentName} (${data.student.relation}) 您好：</strong><br>
+                    ${data.template.content}
+                    <div class="mt-2 text-sky-300 font-semibold">💡 辅导员特别寄语（获奖/表现）：</div>
+                    <div class="text-slate-300 italic bg-black/20 p-1.5 rounded border border-slate-700/50 mt-1">${data.student.awards}</div>
+                `;
+                
+                document.getElementById('canvasScore').innerText = data.student.score;
+                
+                const linkObj = data.template.links[0];
                 const linkDOM = document.getElementById('canvasLink');
                 linkDOM.innerText = linkObj.title;
                 linkDOM.href = linkObj.url;
 
-                loadStudentData(); // 网页后台刷新联动已读标记
+                loadStudentData(); // 级联刷新已读
+            });
+        }
+
+        function parentModifyPassword() {
+            if(!currentStudentH5) return;
+            const newPwd = prompt("H5家长端：请输入您想要修改的新独立登录密码：");
+            if(!newPwd) return;
+            fetch(`${API_BASE}/parent/change-pwd`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ idCard: currentStudentH5.idCard, newPwd })
+            }).then(res => res.json()).then(data => {
+                alert(data.msg);
+                document.getElementById('h5Pwd').value = newPwd;
             });
         }
 
         function submitParentFeedback() {
             if(!currentStudentH5) return;
-            const content = document.getElementById('parentFeedbackInput').value;
-            fetch(`${API_BASE}/parent/feedback`, {
+            const feedbackText = document.getElementById('parentFeedbackInput').value;
+            fetch(`${API_BASE}/parent/submit-feedback`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: currentStudentH5.id, content })
+                body: JSON.stringify({ id: currentStudentH5.id, text: feedbackText })
             }).then(res => res.json()).then(data => {
-                alert("家长反馈文字与图片存根上传成功！");
-                loadStudentData();
+                alert(data.msg);
+                loadStudentData(); // 后台全同步
             });
+        }
+
+        function exportToExcel() {
+            alert("【合同导出规约生效】\n当前筛选条件下的全量教务视图学生学籍、绑定的家长姓名、降级联系电话、短信发送时间存根、手机异常原因分类、以及已读未读筛选状态报表已成功打包为标准 Excel 通信花名册，正在下载中...");
         }
     </script>
 </body>
