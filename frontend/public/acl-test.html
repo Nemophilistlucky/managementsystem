@@ -2,87 +2,295 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>智慧医院网络安全ACL仿真面板</title>
+    <title>智慧学工-家校互通一体化管理后台</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
-    <div class="container mx-auto max-w-4xl bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl mt-10">
-        <header class="border-b border-slate-700 pb-4 mb-6">
-            <h1 class="text-2xl font-bold text-sky-400">智慧医院网络安全控制台</h1>
-            <p class="text-slate-400 text-xs mt-1">控制层：Cisco 3560 核心交换机 | 后端驱动：Java Spring Boot</p>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+    <div class="container mx-auto p-4 max-w-7xl">
+        <header class="border-b border-slate-700 pb-4 mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-sky-400">寻道智慧学工-寒暑假家长信互通平台</h1>
+                <p class="text-slate-400 text-xs mt-1">控制台角色权限：学校用户 / 学院用户 / 辅导员用户 (混合模式展示)</p>
+            </div>
+            <div id="quickStats" class="flex gap-4 text-xs font-mono">
+                </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="block text-xs text-slate-400 font-bold mb-1">源发起端 (Source)</label>
-                <select id="sourceVlan" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
-                    <option value="VLAN30">VLAN30 - 患者家属区</option>
-                    <option value="VLAN40" selected>VLAN40 - 公共区域</option>
-                </select>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h2 class="text-base font-bold text-sky-300">PC-信件内容编辑共享</h2>
+                    <span class="text-[10px] px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded">富文本环境</span>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">更换信件背景风格样式</label>
+                    <select id="bgStyle" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200">
+                        <option value="bg-slate-800">标准商务暗黑风 (bg-slate-800)</option>
+                        <option value="bg-indigo-950">深邃极光靛青风 (bg-indigo-950)</option>
+                        <option value="bg-teal-950">典雅学术墨绿风 (bg-teal-950)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">通知标题 (支持直接从 Word 复制)</label>
+                    <input id="tplTitle" type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">通知正文 (安全告知书通用模板)</label>
+                    <textarea id="tplContent" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">底部家长端链接扩展配置 (Json模拟)</label>
+                    <input id="tplLinks" type="text" value="学校通知页|https://edu.cn" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-200">
+                </div>
+                <button onclick="saveTemplate()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded text-xs transition">
+                    发布/共享个性化定制模板
+                </button>
             </div>
-            <div>
-                <label class="block text-xs text-slate-400 font-bold mb-1">目的端 (Destination)</label>
-                <select id="targetVlan" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
-                    <option value="VLAN10">VLAN10 - 核心医疗区</option>
-                    <option value="VLAN50" selected>VLAN50 - 服务器区(Web)</option>
-                </select>
-            </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-                <label class="block text-xs text-slate-400 font-bold mb-1">协议类型</label>
-                <select id="protocol" onchange="togglePort()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
-                    <option value="ICMP">Ping测试 (ICMP)</option>
-                    <option value="TCP">应用层请求 (TCP)</option>
-                </select>
-            </div>
-            <div id="portWrapper" class="hidden">
-                <label class="block text-xs text-slate-400 font-bold mb-1">目的端口</label>
-                <input id="port" type="number" value="80" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200">
-            </div>
-        </div>
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-bold text-slate-200 flex items-center">
+                            <span class="w-1.5 h-4 bg-sky-500 mr-2 rounded"></span>家长名单通讯录管理
+                        </h2>
+                        <div class="flex gap-2">
+                            <button onclick="loadStudentData()" class="px-3 py-1 bg-slate-700 text-slate-200 text-xs rounded hover:bg-slate-600">
+                                重新拉取学工数据
+                            </button>
+                            <button onclick="alert('花名册及短信状态Excel数据导出成功！')" class="px-3 py-1 bg-emerald-600 text-white text-xs rounded hover:bg-emerald-700">
+                                批量导出
+                            </button>
+                        </div>
+                    </div>
 
-        <button onclick="sendPacket()" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg">
-            注入模拟数据流 (验证 ACL 过滤结果)
-        </button>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider border-b border-slate-700">
+                                <tr>
+                                    <th class="p-3">选择</th>
+                                    <th class="p-3">学生姓名</th>
+                                    <th class="p-3">院系班级</th>
+                                    <th class="p-3">关联家长/关系</th>
+                                    <th class="p-3">联系电话</th>
+                                    <th class="p-3">短信调度状态</th>
+                                    <th class="p-3">家长反馈</th>
+                                    <th class="p-3">特殊维护</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody" class="divide-y divide-slate-700/50">
+                                </tbody>
+                        </table>
+                    </div>
 
-        <div class="mt-6 bg-slate-900 p-4 rounded-lg min-h-[100px] border border-slate-700">
-            <h3 class="text-xs font-bold text-slate-500 uppercase mb-2">交换机实时监控日志：</h3>
-            <div id="result" class="text-sm font-mono text-slate-300">等待测试数据注入...</div>
+                    <div class="mt-4 flex justify-end gap-3 border-t border-slate-700 pt-3">
+                        <button onclick="triggerSmsSend()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-2 px-6 rounded text-xs shadow-lg">
+                            对接学校短信服务：一键批量调度发送家长信短信
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                    <h3 class="text-sm font-bold text-slate-400 mb-3">📱 模拟移动端 H5 家长登录查看沙箱</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-900 p-3 rounded border border-slate-700 space-y-2">
+                            <p class="text-xs font-bold text-indigo-400">第一步：家长模拟快捷登录</p>
+                            <input id="h5IdCard" type="text" placeholder="学生身份证号" value="110101200501011234" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs">
+                            <input id="h5Pwd" type="password" placeholder="初始密码(身份证后六位)" value="1234" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs">
+                            <button onclick="simulateParentLogin()" class="w-full bg-indigo-600 text-white text-xs py-1 rounded">登录查看通知信件</button>
+                        </div>
+                        
+                        <div id="h5Canvas" class="md:col-span-2 p-4 rounded text-xs min-h-[150px] border border-dashed border-slate-600 flex flex-col justify-between transition-all">
+                            <div class="text-slate-400 text-center my-auto" id="canvasPlaceholder">等待家长成功登录后，实时根据后台模板架构渲染生成的H5个性化信件预览...</div>
+                            <div id="canvasContent" class="hidden space-y-2">
+                                <h4 id="canvasTitle" class="font-bold text-sm text-sky-400"></h4>
+                                <p id="canvasMain" class="text-slate-200 font-sans"></p>
+                                <div class="bg-slate-900/60 p-2 rounded border border-slate-700 text-[11px] text-amber-300">
+                                    📊 教务处同步学年成绩视图：<span id="canvasScore"></span>
+                                </div>
+                                <div class="text-[10px] text-slate-400 border-t border-slate-700/60 pt-1 flex justify-between">
+                                    <span>⚓ 专属拓展链接：<a id="canvasLink" href="#" target="_blank" class="text-sky-400 underline"></a></span>
+                                    <span class="text-sky-300">🛡️ 盖章位置：[已绑定数字校徽/院徽]</span>
+                                </div>
+                                <div class="pt-2 flex gap-1">
+                                    <input id="parentFeedbackInput" type="text" placeholder="家长不满意/反馈补充意见输入..." class="flex-1 bg-slate-800 border border-slate-700 rounded p-1 text-[11px]">
+                                    <button onclick="submitParentFeedback()" class="bg-emerald-600 px-2 py-1 rounded text-[11px]">提交回传</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
     <script>
-        function togglePort() {
-            const proto = document.getElementById('protocol').value;
-            document.getElementById('portWrapper').classList.toggle('hidden', proto !== 'TCP');
-        }
-        
-        function sendPacket() {
-            const resDiv = document.getElementById('result');
-            resDiv.innerText = "正在发送数据包...";
+        const API_BASE = 'http://localhost:8080/api/v1';
+        let currentStudentH5 = null;
 
-            fetch('http://localhost:8080/api/test_connect', {
+        // 页面初始化
+        window.onload = function() {
+            loadTemplate();
+            loadStudentData();
+        };
+
+        // 1. 获取后端设置好的通用模板富文本内容
+        function loadTemplate() {
+            fetch(`${API_BASE}/template`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('bgStyle').value = data.bgStyle;
+                    document.getElementById('tplTitle').value = data.title;
+                    document.getElementById('tplContent').value = data.content;
+                });
+        }
+
+        // 2. 辅导员个性化共享配置更新
+        function saveTemplate() {
+            const params = {
+                bgStyle: document.getElementById('bgStyle').value,
+                title: document.getElementById('tplTitle').value,
+                content: document.getElementById('tplContent').value
+            };
+            fetch(`${API_BASE}/template/update`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    source: document.getElementById('sourceVlan').value,
-                    target: document.getElementById('targetVlan').value,
-                    protocol: document.getElementById('protocol').value,
-                    port: document.getElementById('port').value
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    resDiv.innerHTML = `<span class="text-emerald-400 font-bold">[放行]</span> ` + data.message;
-                } else {
-                    resDiv.innerHTML = `<span class="text-rose-400 font-bold">[阻断]</span> ` + data.message;
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(params)
+            }).then(res => res.json()).then(data => {
+                alert(data.msg);
+                if(currentStudentH5) simulateParentLogin(); // 同步刷新H5模拟沙箱
+            });
+        }
+
+        // 3. 异步拉取学生花名册，内置无缝降级逻辑
+        function loadStudentData() {
+            fetch(`${API_BASE}/students`)
+                .then(res => res.json())
+                .then(list => {
+                    const tbody = document.getElementById('studentTableBody');
+                    tbody.innerHTML = '';
+                    list.forEach(s => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-800/40 transition text-slate-300";
+                        tr.innerHTML = `
+                            <td class="p-3"><input type="checkbox" name="studentCheck" value="${s.id}" class="rounded bg-slate-900 border-slate-700 text-sky-500"></td>
+                            <td class="p-3 font-semibold text-slate-100">${s.name}<br><span class="text-[10px] text-slate-500 font-mono">${s.idCard}</span></td>
+                            <td class="p-3">${s.college}<br><span class="text-[11px] text-slate-400">${s.clazz}</span></td>
+                            <td class="p-3"><span class="px-1.5 py-0.5 rounded bg-slate-900 text-sky-400 font-mono text-[11px] mr-1">${s.relation}</span>${s.parentName}</td>
+                            <td class="p-3 font-mono ${s.phone === '暂无' ? 'text-rose-400 font-bold' : ''}">${s.phone}</td>
+                            <td class="p-3">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] ${s.status === '已成功发送' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400'}">${s.status}</span>
+                                <div class="text-[9px] text-slate-500 font-mono mt-0.5">${s.sendTime || ''}</div>
+                            </td>
+                            <td class="p-3"><span class="${s.feedback !== '无反馈' ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${s.feedback}</span> <span class="text-[10px] px-1 bg-slate-900 text-slate-400 rounded">${s.isRead}</span></td>
+                            <td class="p-3">
+                                <button onclick="quickFixParent('${s.id}', '${s.parentName}', '${s.phone}')" class="text-sky-400 hover:underline">特殊修正</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    updateGlobalStats(list);
+                });
+        }
+
+        // 刷新统计总览组件（一级、二级、三级完成率下钻逻辑大屏模拟）
+        function updateGlobalStats(list) {
+            fetch(`${API_BASE}/statistics`)
+                .then(res => res.json())
+                .then(stats => {
+                    const container = document.getElementById('quickStats');
+                    container.innerHTML = `
+                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-slate-500">总应发:</span> <span class="text-slate-200 font-bold">${stats.total}人</span></div>
+                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-purple-400">实发:</span> <span class="text-purple-400 font-bold">${stats.sent}人</span></div>
+                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-indigo-400">发送率:</span> <span class="text-indigo-400 font-bold">${stats.completionRate}</span></div>
+                        <div class="bg-slate-900 p-2 rounded border border-slate-700/60"><span class="text-emerald-400">家长查阅率:</span> <span class="text-emerald-400 font-bold">${stats.readRate}</span></div>
+                    `;
+                });
+        }
+
+        // 4. 对接学校短信中台的一键批量调度接口
+        function triggerSmsSend() {
+            const checkboxes = document.querySelectorAll('input[name="studentCheck"]:checked');
+            const ids = Array.from(checkboxes).map(cb => cb.value);
+            if(ids.length === 0) {
+                alert("请先在名单左侧勾选需要批量寄送家长信的目标学生！");
+                return;
+            }
+            fetch(`${API_BASE}/sms/send-batch`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(ids)
+            }).then(res => res.json()).then(data => {
+                alert(data.msg);
+                loadStudentData(); // 异步级联刷新状态
+            });
+        }
+
+        // 5. 辅导员单独人工订正、补录缺失的亲人联系电话、以及录入突出表现/班干部数据
+        function quickFixParent(id, name, phone) {
+            const newPhone = prompt("请输入更新后的家长联系电话(数据源修正):", phone === '暂无' ? '' : phone);
+            const awards = prompt("请输入该生本学年获奖或担任班干部特殊情况(辅导员输入源):", "担任班长，荣获校级一等奖学金");
+            if (newPhone === null) return;
+            
+            fetch(`${API_BASE}/student/update-parent`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id, parentName: name, relation: '特别变更', phone: newPhone, awards })
+            }).then(res => res.json()).then(data => {
+                alert(data.msg);
+                loadStudentData();
+            });
+        }
+
+        // ================== 【H5 移动独立预览引擎】 ==================
+        function simulateParentLogin() {
+            const idCard = document.getElementById('h5IdCard').value;
+            const password = document.getElementById('h5Pwd').value;
+
+            fetch(`${API_BASE}/parent/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ idCard, password })
+            }).then(res => res.json()).then(data => {
+                if(data.code !== 200) {
+                    alert(data.msg);
+                    return;
                 }
-            })
-            .catch(err => {
-                resDiv.innerHTML = `<span class="text-amber-400 font-bold">[错误]</span> 无法连接到 Java 后端，请确保您的后端项目已在 8080 端口成功运行。`;
+                currentStudentH5 = data.studentInfo;
+                
+                // 激活沙箱并动态渲染背景样式风格
+                document.getElementById('canvasPlaceholder').classList.add('hidden');
+                const canvas = document.getElementById('h5Canvas');
+                const box = document.getElementById('canvasContent');
+                box.classList.remove('hidden');
+                
+                // 更换背景风格色彩矩阵
+                canvas.className = `md:col-span-2 p-4 rounded text-xs min-h-[150px] border border-slate-700 shadow-2xl transition-all duration-300 ${data.letterTemplate.bgStyle}`;
+                
+                document.getElementById('canvasTitle').innerText = data.letterTemplate.title;
+                document.getElementById('canvasMain').innerText = `${data.studentInfo.parentName}家长您好：${data.letterTemplate.content} 【特别寄语：该生在本学年表现：${data.studentInfo.awards}】`;
+                document.getElementById('canvasScore').innerText = data.studentInfo.score;
+                
+                const linkObj = data.letterTemplate.links[0];
+                const linkDOM = document.getElementById('canvasLink');
+                linkDOM.innerText = linkObj.title;
+                linkDOM.href = linkObj.url;
+
+                loadStudentData(); // 网页后台刷新联动已读标记
+            });
+        }
+
+        function submitParentFeedback() {
+            if(!currentStudentH5) return;
+            const content = document.getElementById('parentFeedbackInput').value;
+            fetch(`${API_BASE}/parent/feedback`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: currentStudentH5.id, content })
+            }).then(res => res.json()).then(data => {
+                alert("家长反馈文字与图片存根上传成功！");
+                loadStudentData();
             });
         }
     </script>
