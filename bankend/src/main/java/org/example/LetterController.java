@@ -105,6 +105,18 @@ public class LetterController {
     }
 
     // 辅导员批量或单独更改家长栏，允许单独变更为奶奶，且支持更改电话
+    // 管理后台教职工/管理员登录入口
+    @PostMapping("/admin/login")
+    public Map<String, Object> adminLogin(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
+        
+        // 简单模拟权限放行
+        if (("admin".equals(username) || "teacher".equals(username)) && "123456".equals(password)) {
+            return Map.of("code", 200, "msg", "登录成功，欢迎进入管理后台！");
+        }
+        return Map.of("code", 400, "msg", "工号或密码错误！(提示: 测试账号 admin 或 teacher, 密码 123456)");
+    }
     @PostMapping("/student/update-parent")
     public Map<String, Object> updateParent(@RequestBody Map<String, String> params) {
         String id = params.get("id");
